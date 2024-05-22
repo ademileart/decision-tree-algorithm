@@ -34,6 +34,7 @@ gender_counts = dataset['gender'].value_counts()
 # Initialize stroke risk column
 dataset['stroke_risk'] = 0
 
+
 # Factors affecting stroke risk
 dataset['stroke_risk'] += (dataset['age'] > 60)
 dataset['stroke_risk'] += dataset['hypertension']
