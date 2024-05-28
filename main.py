@@ -7,16 +7,12 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 import graphviz
 from sklearn.tree import export_graphviz
 
-# Load dataset
 dataset = pd.read_csv('../healthcare-dataset-stroke-data.csv', sep=',', encoding='cp1252')
 
-# Remove missing values
 dataset.dropna(inplace=True)
 
-# Rename Residence_type to residence_type
 dataset.rename(columns={'Residence_type': 'residence_type'}, inplace=True)
 
-# Convert columns to numeric
 dataset['age'] = pd.to_numeric(dataset['age'], errors='coerce')
 dataset['bmi'] = pd.to_numeric(dataset['bmi'], errors='coerce')
 dataset['gender'] = dataset['gender'].map({'Male': 1, 'Female': 0})
@@ -28,14 +24,11 @@ dataset['smoking_status'] = dataset['smoking_status'].map({'smokes': 1, 'formerl
 total_dataset_rows = dataset.shape[0]
 print("Total Rows:", total_dataset_rows)
 
-# Count gender distribution and plot pie chart
 gender_counts = dataset['gender'].value_counts()
 
-# Initialize stroke risk column
 dataset['stroke_risk'] = 0
 
 
-# Factors affecting stroke risk
 dataset['stroke_risk'] += (dataset['age'] > 60)
 dataset['stroke_risk'] += dataset['hypertension']
 dataset['stroke_risk'] += dataset['heart_disease']
@@ -46,14 +39,12 @@ dataset['stroke_risk'] += (dataset['gender'] == 0)  # Adjusted for binary gender
 dataset['stroke_risk'] += (dataset['ever_married'] == 0)
 dataset['stroke_risk'] += (dataset['residence_type'] == 1)
 
-# Assign stroke label based on stroke risk
 dataset['stroke'] = (dataset['stroke_risk'] >= 5).astype(int)
 
 total_strokes = dataset['stroke'].sum()
 print("Total Strokes:", total_strokes)
 print("Percentage Strokes:", ((total_strokes / total_dataset_rows) * 100).round(2), "%")
 
-# Exploratory Data Analysis (EDA)
 plt.figure(figsize=(12, 8))
 sns.histplot(dataset['age'], bins=30, kde=True, color='blue')
 plt.title('Distribution of Age')
@@ -69,7 +60,6 @@ plt.ylabel('Count')
 plt.legend(title='Stroke', labels=['No', 'Yes'])
 plt.show()
 
-# Feature Selection (Based on correlation)
 numeric_columns = dataset.select_dtypes(include=['float64', 'int64']).columns
 corr_matrix = dataset[numeric_columns].corr()
 
@@ -78,63 +68,51 @@ sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
 plt.title('Correlation Heatmap')
 plt.show()
 
-# Model Creation
-# Split data into features and target variable
-X = dataset.drop(columns=['id', 'stroke', 'stroke_risk', 'work_type'])  # Features
-y = dataset['stroke']  # Target variable
 
-# Split data into train and test sets
+X = dataset.drop(columns=['id', 'stroke', 'stroke_risk', 'work_type'])
+y = dataset['stroke']
+
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
-# Decision Tree Classifiers
 dt_gini = DecisionTreeClassifier(criterion='gini', random_state=42)
 dt_entropy = DecisionTreeClassifier(criterion='entropy', random_state=42)
 
-# Fit the models
 dt_gini.fit(X_train, y_train)
 dt_entropy.fit(X_train, y_train)
 
-# Predictions
 y_pred_gini = dt_gini.predict(X_test)
 y_pred_entropy = dt_entropy.predict(X_test)
 
-# Evaluate models
 accuracy_gini = accuracy_score(y_test, y_pred_gini)
 accuracy_entropy = accuracy_score(y_test, y_pred_entropy)
 
 print("Gini Accuracy:", accuracy_gini)
 print("Entropy Accuracy:", accuracy_entropy)
 
-# Classification Reports
 print("\nClassification Report for Gini:")
 print(classification_report(y_test, y_pred_gini))
 print("\nClassification Report for Entropy:")
 print(classification_report(y_test, y_pred_entropy))
 
-# Confusion Matrices
 print("\nConfusion Matrix for Gini:")
 print(confusion_matrix(y_test, y_pred_gini))
 print("\nConfusion Matrix for Entropy:")
 print(confusion_matrix(y_test, y_pred_entropy))
 
-# Feature Importance
 features = X.columns
 
-# Gini feature importance
 importances_gini = dt_gini.feature_importances_
 indices_gini = importances_gini.argsort()[::-1]
 print("\nFeature importances using Gini:")
 for f in range(X.shape[1]):
     print(f"{features[indices_gini[f]]}: {importances_gini[indices_gini[f]]}")
 
-# Entropy feature importance
 importances_entropy = dt_entropy.feature_importances_
 indices_entropy = importances_entropy.argsort()[::-1]
 print("\nFeature importances using Entropy:")
 for f in range(X.shape[1]):
     print(f"{features[indices_entropy[f]]}: {importances_entropy[indices_entropy[f]]}")
 
-# Visualize the decision tree
 plt.figure(figsize=(16, 6), dpi=670)
 plot_tree(dt_gini, filled=True, feature_names=features, class_names=['No Stroke', 'Stroke'], rounded=True)
 plt.title('Decision Tree using Gini')
