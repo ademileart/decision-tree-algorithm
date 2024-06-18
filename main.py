@@ -4,8 +4,7 @@ import seaborn as sns
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-import graphviz
-from sklearn.tree import export_graphviz
+
 
 dataset = pd.read_csv('../healthcare-dataset-stroke-data.csv', sep=',', encoding='cp1252')
 
@@ -20,7 +19,6 @@ dataset['ever_married'] = dataset['ever_married'].map({'Yes': 1, 'No': 0})
 dataset['residence_type'] = dataset['residence_type'].map({'Urban': 1, 'Rural': 0})
 dataset['smoking_status'] = dataset['smoking_status'].map({'smokes': 1, 'formerly smoked': 1, 'Unknown': 0, 'never smoked': 0})
 
-# Get row count
 total_dataset_rows = dataset.shape[0]
 print("Total Rows:", total_dataset_rows)
 
@@ -35,7 +33,7 @@ dataset['stroke_risk'] += dataset['heart_disease']
 dataset['stroke_risk'] += (dataset['avg_glucose_level'] >= 150)
 dataset['stroke_risk'] += (dataset['bmi'] >= 30)
 dataset['stroke_risk'] += (dataset['smoking_status'] == 1)
-dataset['stroke_risk'] += (dataset['gender'] == 0)  # Adjusted for binary gender
+dataset['stroke_risk'] += (dataset['gender'] == 0)
 dataset['stroke_risk'] += (dataset['ever_married'] == 0)
 dataset['stroke_risk'] += (dataset['residence_type'] == 1)
 
